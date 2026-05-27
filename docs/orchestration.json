@@ -1,0 +1,22 @@
+{
+  "name": "runfreeze",
+  "schemaVersion": 1,
+  "inputs": [
+    "runfreeze.yaml"
+  ],
+  "outputs": [
+    "runfreeze.json",
+    "RUNS.md"
+  ],
+  "commands": {
+    "record": "runfreeze record --config runfreeze.yaml --output runfreeze.json",
+    "summarize": "runfreeze summarize runfreeze.json --output RUNS.md",
+    "verify": "runfreeze verify runfreeze.json"
+  },
+  "safety": {
+    "allowlistRequired": true,
+    "cwdBounded": true,
+    "redactionEnabled": true,
+    "boundedOutput": true
+  }
+}
