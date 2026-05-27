@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "description": "Local-first command smoke evidence recorder.",
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "./dist/src/index.js",
   "bin": {
-    "runfreeze": "./dist/cli.js"
+    "runfreeze": "./dist/src/cli.js"
   },
   "exports": {
-    ".": "./dist/index.js"
+    ".": "./dist/src/index.js"
   },
   "files": [
     "dist",
@@ -20,7 +20,7 @@
     "check": "tsc --noEmit",
     "test": "npm run build && node --test \"dist/tests/**/*.test.js\"",
     "smoke": "bash scripts/smoke.sh",
-    "package:smoke": "npm pack --dry-run",
+    "package:smoke": "test -f dist/src/cli.js && test -f dist/src/index.js && npm pack --dry-run",
     "release:check": "npm run check && npm test && npm run smoke && npm run package:smoke"
   },
   "keywords": [
