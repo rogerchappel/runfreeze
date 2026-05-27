@@ -6,7 +6,7 @@ export type PreparedCommand = {
   id: string;
   command: string[];
   cwd: string;
-  env?: Record<string, string>;
+  env?: Record<string, string> | undefined;
   timeoutMs: number;
   maxOutputBytes: number;
   allowFailure: boolean;

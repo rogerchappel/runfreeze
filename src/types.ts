@@ -1,10 +1,10 @@
 export type RunfreezeCommand = {
   id: string;
   run: string | string[];
-  cwd?: string;
-  env?: Record<string, string>;
-  timeoutMs?: number;
-  maxOutputBytes?: number;
+  cwd?: string | undefined;
+  env?: Record<string, string> | undefined;
+  timeoutMs?: number | undefined;
+  maxOutputBytes?: number | undefined;
   allowFailure?: boolean;
 };
 
