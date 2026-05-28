@@ -24,6 +24,7 @@ async function runPreparedCommand(
   const stdout = new ByteCapture(prepared.maxOutputBytes);
   const stderr = new ByteCapture(prepared.maxOutputBytes);
   let timedOut = false;
+  let spawnError: Error | undefined;
 
   const child = spawn(prepared.command[0]!, prepared.command.slice(1), {
     cwd: prepared.cwd,
@@ -40,12 +41,17 @@ async function runPreparedCommand(
   child.stdout?.on("data", (chunk: Buffer) => stdout.append(chunk));
   child.stderr?.on("data", (chunk: Buffer) => stderr.append(chunk));
 
-  const result = await new Promise<{ exitCode: number | null; signal: NodeJS.Signals | null }>(
-    (resolve) => {
-      child.on("close", (exitCode, signal) => resolve({ exitCode, signal }));
-    },
-  );
+  const result = await new Promise<{ exitCode: number | null; signal: NodeJS.Signals | null }>((resolve) => {
+    child.on("error", (error) => {
+      spawnError = error;
+    });
+    child.on("close", (exitCode, signal) => resolve({ exitCode, signal }));
+  });
   clearTimeout(timeout);
+
+  if (spawnError) {
+    stderr.append(`${spawnError.name}: ${spawnError.message}\n`);
+  }
 
   const ended = new Date();
   const redacted = redactStreams(stdout.toJSON(), stderr.toJSON(), redactPatterns);

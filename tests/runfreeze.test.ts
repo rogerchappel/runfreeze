@@ -40,4 +40,36 @@ commands:
     assert.equal(renderMarkdown(report).includes("# Runfreeze Evidence"), true);
     assert.equal(verifyReport(report).ok, true);
   });
+
+  it("records spawn errors as failed command evidence", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "runfreeze-"));
+    const configPath = path.join(root, "runfreeze.yaml");
+    await writeFile(
+      configPath,
+      `root: .
+allow: [missing-runfreeze-fixture]
+commands:
+  - id: missing
+    run: missing-runfreeze-fixture --version
+`,
+    );
+
+    const report = await record(await loadConfig(configPath), "test");
+
+    assert.equal(report.summary.failed, 1);
+    assert.notEqual(report.commands[0]?.exitCode, 0);
+    assert.equal(report.commands[0]?.stderr.text.includes("ENOENT"), true);
+    assert.equal(verifyReport(report).ok, false);
+  });
+
+  it("reports malformed evidence instead of throwing", () => {
+    assert.deepEqual(verifyReport(null), {
+      ok: false,
+      errors: ["report must be an object"],
+    });
+
+    const result = verifyReport({ schemaVersion: 1, commands: [null] });
+    assert.equal(result.ok, false);
+    assert.equal(result.errors.includes("command must be an object"), true);
+  });
 });
