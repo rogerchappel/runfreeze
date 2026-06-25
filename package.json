@@ -3,17 +3,26 @@
   "version": "0.1.0",
   "description": "Local-first command smoke evidence recorder.",
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "bin": {
-    "runfreeze": "./dist/cli.js"
+    "runfreeze": "./dist/src/cli.js"
   },
   "exports": {
-    ".": "./dist/index.js"
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    }
   },
   "files": [
     "dist",
+    "docs",
     "examples",
-    "README.md"
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "SECURITY.md",
+    "CONTRIBUTING.md"
   ],
   "scripts": {
     "build": "tsc",
@@ -32,6 +41,14 @@
   ],
   "author": "Roger Chappel",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rogerchappel/runfreeze.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rogerchappel/runfreeze/issues"
+  },
+  "homepage": "https://github.com/rogerchappel/runfreeze#readme",
   "engines": {
     "node": ">=20"
   },
