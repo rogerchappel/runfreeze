@@ -1,0 +1,13 @@
+root: ..
+allow:
+  - npm
+  - node
+maxOutputBytes: 65536
+timeoutMs: 120000
+commands:
+  - id: typecheck
+    run: npm run check
+  - id: tests
+    run: npm test
+  - id: cli-version
+    run: node dist/src/cli.js --version

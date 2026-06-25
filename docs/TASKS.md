@@ -1,5 +1,7 @@
 # runfreeze Tasks
 
+Status: active
+
 ## V1 MVP
 
 - [x] Scaffold a TypeScript CLI with `init`, `record`, `summarize`, and `verify`.
@@ -17,3 +19,6 @@
 - [ ] Add richer diffing between two evidence packs.
 - [ ] Add optional SARIF output for CI annotations.
 - [ ] Add examples for multi-command release smoke evidence.
+- [ ] Add package-install smoke coverage before first npm publish.
+- [ ] Add examples for monorepos and multi-language projects.
+- [ ] Decide whether to publish generated reports as CI artifacts.
