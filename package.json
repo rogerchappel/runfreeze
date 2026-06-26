@@ -29,7 +29,8 @@
     "check": "tsc --noEmit",
     "test": "npm run build && node --test \"dist/tests/**/*.test.js\"",
     "smoke": "bash scripts/smoke.sh",
-    "package:smoke": "test -f dist/src/cli.js && test -f dist/src/index.js && npm pack --dry-run",
+    "prepack": "npm run build",
+    "package:smoke": "npm run build && test -f dist/src/cli.js && test -f dist/src/index.js && test -f examples/runfreeze.yaml && npm pack --dry-run",
     "release:check": "npm run check && npm test && npm run smoke && npm run package:smoke"
   },
   "keywords": [
