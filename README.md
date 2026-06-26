@@ -18,14 +18,21 @@ npm run build
 
 ## Use
 
+From a local checkout, use the built CLI:
+
 ```sh
-runfreeze init
-runfreeze record --config runfreeze.yaml --output runfreeze.json
-runfreeze summarize runfreeze.json --output RUNS.md
-runfreeze verify runfreeze.json
+node dist/src/cli.js init
+node dist/src/cli.js record --config runfreeze.yaml --output runfreeze.json
+node dist/src/cli.js summarize runfreeze.json --output RUNS.md
+node dist/src/cli.js verify runfreeze.json
 ```
 
+After package installation, replace `node dist/src/cli.js` with `runfreeze`.
+
 Commands fail closed: each command must stay inside the configured root and match the `allow` list.
+
+See [examples/runfreeze.yaml](examples/runfreeze.yaml) for a tiny allowlisted
+Node.js command set that can be recorded, summarized, and verified locally.
 
 ## Verify
 
@@ -44,10 +51,9 @@ should be small, reviewable, and verified before review.
 
 ## Security
 
-See [SECURITY.md](SECURITY.md) for vulnerability reporting guidance. Replace
-the default security policy before publishing the generated repository.
-
-These links assume this README has been copied to the generated repository root.
+See [SECURITY.md](SECURITY.md) for vulnerability reporting guidance. Review
+captured command output before sharing reports; redaction is helpful but not a
+substitute for human review of sensitive logs.
 
 ## License
 
@@ -58,6 +64,7 @@ MIT
 Run these checks before opening a PR or publishing a release:
 
 ```bash
+npm run check
 npm test
 npm run smoke
 npm run package:smoke
