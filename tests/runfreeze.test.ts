@@ -40,4 +40,35 @@ commands:
     assert.equal(renderMarkdown(report).includes("# Runfreeze Evidence"), true);
     assert.equal(verifyReport(report).ok, true);
   });
+
+  it("force-terminates a command that ignores SIGTERM after the timeout grace period", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "runfreeze-timeout-"));
+    const configPath = path.join(root, "runfreeze.yaml");
+    await writeFile(
+      path.join(root, "ignore-term.mjs"),
+      [
+        "process.on('SIGTERM', () => {});",
+        // Keep the suite bounded even if timeout escalation regresses.
+        "setTimeout(() => process.exit(99), 5000);",
+      ].join("\n"),
+    );
+    await writeFile(
+      configPath,
+      `root: .
+allow: [node]
+timeoutMs: 50
+commands:
+  - id: ignores-term
+    run: node ignore-term.mjs
+`,
+    );
+
+    const report = await record(await loadConfig(configPath), "test");
+    const command = report.commands[0];
+
+    assert.equal(command?.timedOut, true);
+    assert.equal(command?.signal, "SIGKILL");
+    assert.equal(command?.exitCode, null);
+    assert.ok(command.durationMs < 3_000, `command took ${command.durationMs}ms`);
+  });
 });

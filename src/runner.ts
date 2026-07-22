@@ -4,6 +4,8 @@ import { prepareCommand } from "./command.js";
 import { redactStreams } from "./redact.js";
 import type { RecordedCommand, RunfreezeConfig, RunfreezeReport } from "./types.js";
 
+const FORCE_KILL_GRACE_MS = 1_000;
+
 export async function record(config: RunfreezeConfig, version: string): Promise<RunfreezeReport> {
   const commands: RecordedCommand[] = [];
 
@@ -24,6 +26,7 @@ async function runPreparedCommand(
   const stdout = new ByteCapture(prepared.maxOutputBytes);
   const stderr = new ByteCapture(prepared.maxOutputBytes);
   let timedOut = false;
+  let forceKillTimeout: NodeJS.Timeout | undefined;
 
   const child = spawn(prepared.command[0]!, prepared.command.slice(1), {
     cwd: prepared.cwd,
@@ -35,6 +38,7 @@ async function runPreparedCommand(
   const timeout = setTimeout(() => {
     timedOut = true;
     child.kill("SIGTERM");
+    forceKillTimeout = setTimeout(() => child.kill("SIGKILL"), FORCE_KILL_GRACE_MS);
   }, prepared.timeoutMs);
 
   child.stdout?.on("data", (chunk: Buffer) => stdout.append(chunk));
@@ -46,6 +50,7 @@ async function runPreparedCommand(
     },
   );
   clearTimeout(timeout);
+  if (forceKillTimeout) clearTimeout(forceKillTimeout);
 
   const ended = new Date();
   const redacted = redactStreams(stdout.toJSON(), stderr.toJSON(), redactPatterns);
