@@ -41,6 +41,39 @@ commands:
     assert.equal(verifyReport(report).ok, true);
   });
 
+  it("records executable launch errors and continues with later commands", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "runfreeze-spawn-error-"));
+    const configPath = path.join(root, "runfreeze.yaml");
+    const missingExecutable = "runfreeze-definitely-not-installed";
+    await writeFile(
+      configPath,
+      `root: .
+allow: [${missingExecutable}, node]
+maxOutputBytes: 65536
+timeoutMs: 10000
+commands:
+  - id: missing
+    run: ${missingExecutable}
+  - id: subsequent
+    run: node --version
+`,
+    );
+
+    const report = await record(await loadConfig(configPath), "test");
+    const missing = report.commands[0];
+    const subsequent = report.commands[1];
+
+    assert.equal(report.summary.total, 2);
+    assert.equal(report.summary.failed, 1);
+    assert.equal(missing?.exitCode, 1);
+    assert.equal(missing?.signal, null);
+    assert.equal(missing?.timedOut, false);
+    assert.match(missing?.stderr.text ?? "", /Failed to start command: .*ENOENT/);
+    assert.equal(subsequent?.exitCode, 0);
+    assert.match(subsequent?.stdout.text ?? "", /^v\d+/);
+    assert.equal(verifyReport(report).ok, false);
+  });
+
   it("force-terminates a command that ignores SIGTERM after the timeout grace period", async () => {
     const root = await mkdtemp(path.join(tmpdir(), "runfreeze-timeout-"));
     const configPath = path.join(root, "runfreeze.yaml");
