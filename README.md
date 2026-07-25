@@ -32,6 +32,8 @@ After package installation, replace `node dist/src/cli.js` with `runfreeze`.
 Commands fail closed: each command must stay inside the configured root and match the `allow` list.
 When a command exceeds `timeoutMs`, runfreeze sends `SIGTERM`, waits a one-second grace period,
 then sends `SIGKILL` if the command is still running. The report marks the command as timed out.
+If an executable cannot be started, runfreeze records a failed command with the launch diagnostic
+in stderr, continues recording later configured commands, and writes the complete evidence report.
 
 See [examples/runfreeze.yaml](examples/runfreeze.yaml) for a tiny allowlisted
 Node.js command set that can be recorded, summarized, and verified locally.

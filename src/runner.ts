@@ -46,7 +46,11 @@ async function runPreparedCommand(
 
   const result = await new Promise<{ exitCode: number | null; signal: NodeJS.Signals | null }>(
     (resolve) => {
-      child.on("close", (exitCode, signal) => resolve({ exitCode, signal }));
+      child.once("error", (error) => {
+        stderr.append(`Failed to start command: ${error.message}\n`);
+        resolve({ exitCode: 1, signal: null });
+      });
+      child.once("close", (exitCode, signal) => resolve({ exitCode, signal }));
     },
   );
   clearTimeout(timeout);
