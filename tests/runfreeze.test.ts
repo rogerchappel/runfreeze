@@ -103,5 +103,9 @@ commands:
     assert.equal(command?.signal, "SIGKILL");
     assert.equal(command?.exitCode, null);
     assert.ok(command.durationMs < 3_000, `command took ${command.durationMs}ms`);
+    assert.deepEqual(verifyReport(report).errors, [
+      "ignores-term: command failed with exit SIGKILL",
+      "ignores-term: command timed out",
+    ]);
   });
 });
