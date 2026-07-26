@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { RunfreezeReport } from "./types.js";
+import { validateReport } from "./verify.js";
 
 export async function writeJson(filePath: string, data: unknown): Promise<void> {
   await mkdir(path.dirname(path.resolve(filePath)), { recursive: true });
@@ -9,5 +10,10 @@ export async function writeJson(filePath: string, data: unknown): Promise<void> 
 
 export async function readReport(filePath: string): Promise<RunfreezeReport> {
   const raw = await readFile(filePath, "utf8");
-  return JSON.parse(raw) as RunfreezeReport;
+  const report: unknown = JSON.parse(raw);
+  const result = validateReport(report);
+  if (!result.ok) {
+    throw new Error(`Invalid runfreeze report:\n${result.errors.map((error) => `- ${error}`).join("\n")}`);
+  }
+  return report as RunfreezeReport;
 }
