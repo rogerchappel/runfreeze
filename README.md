@@ -12,22 +12,19 @@ security posture before using it in production.
 ## Install
 
 ```sh
-npm install
-npm run build
+npm install --global runfreeze
 ```
 
 ## Use
 
-From a local checkout, use the built CLI:
+Use the installed CLI:
 
 ```sh
-node dist/src/cli.js init
-node dist/src/cli.js record --config runfreeze.yaml --output runfreeze.json
-node dist/src/cli.js summarize runfreeze.json --output RUNS.md
-node dist/src/cli.js verify runfreeze.json
+runfreeze init
+runfreeze record --config runfreeze.yaml --output runfreeze.json
+runfreeze summarize runfreeze.json --output RUNS.md
+runfreeze verify runfreeze.json
 ```
-
-After package installation, replace `node dist/src/cli.js` with `runfreeze`.
 
 Both `summarize` and `verify` validate external JSON against the complete schema-1
 report structure, including summary totals. `verify` additionally exits nonzero
