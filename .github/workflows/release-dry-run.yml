@@ -7,6 +7,7 @@ on:
       - releasebox.config.json
       - package.json
       - package-lock.json
+      - scripts/package-smoke.sh
       - .github/workflows/release*.yml
 
 permissions:
@@ -39,6 +40,10 @@ jobs:
         run: node /tmp/releasebox/bin/releasebox.js check .
       - name: Run release checks
         run: npm run release:check
+      - name: Exercise npm publication
+        run: |
+          package_file=$(npm pack --silent)
+          npm publish "$package_file" --dry-run --access public
       - name: Release notes preview
         run: |
           node /tmp/releasebox/bin/releasebox.js notes . > release-notes-preview.md
