@@ -15,10 +15,13 @@ cd "$tmp_dir/consumer"
 npm init --yes >/dev/null
 npm install --ignore-scripts "$package_path" >/dev/null
 
+# Keep this workflow aligned with README.md's documented pre-release install.
 runfreeze="$tmp_dir/consumer/node_modules/.bin/runfreeze"
 "$runfreeze" --help >/dev/null
 "$runfreeze" init
 "$runfreeze" record --config runfreeze.yaml --output runfreeze.json
 "$runfreeze" summarize runfreeze.json --output RUNS.md
 "$runfreeze" verify runfreeze.json
+test -s runfreeze.yaml
+test -s runfreeze.json
 test -s RUNS.md
