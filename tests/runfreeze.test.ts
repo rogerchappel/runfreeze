@@ -81,6 +81,10 @@ commands:
       path.join(root, "ignore-term.mjs"),
       [
         "process.on('SIGTERM', () => {});",
+        // Emitting READY after handler registration makes fixture startup observable. The
+        // timeout deliberately leaves enough room for READY on supported CI platforms;
+        // shortening it can race Node startup and test SIGTERM instead of escalation.
+        "console.log('READY');",
         // Keep the suite bounded even if timeout escalation regresses.
         "setTimeout(() => process.exit(99), 5000);",
       ].join("\n"),
@@ -89,7 +93,7 @@ commands:
       configPath,
       `root: .
 allow: [node]
-timeoutMs: 50
+timeoutMs: 1000
 commands:
   - id: ignores-term
     run: node ignore-term.mjs
@@ -100,6 +104,7 @@ commands:
     const command = report.commands[0];
 
     assert.equal(command?.timedOut, true);
+    assert.equal(command?.stdout.text, "READY\n");
     assert.equal(command?.signal, "SIGKILL");
     assert.equal(command?.exitCode, null);
     assert.ok(command.durationMs < 3_000, `command took ${command.durationMs}ms`);
