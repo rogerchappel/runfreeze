@@ -6,24 +6,40 @@ Local-first command smoke evidence recorder.
 
 ## Status
 
-This repository is early-stage. Confirm the current support, release, and
-security posture before using it in production.
+This repository is early-stage and has not yet published an npm release. Until
+[`npm view runfreeze version`](https://www.npmjs.com/package/runfreeze) returns
+a version, install a locally packed tarball as described below. Confirm the
+current support, release, and security posture before using it in production.
 
 ## Install
 
+From a source checkout, build and pack the project, then install that tarball in
+a clean working directory:
+
 ```sh
-npm install --global runfreeze
+git clone https://github.com/rogerchappel/runfreeze.git
+cd runfreeze
+npm ci
+package_file=$(npm pack --silent)
+
+mkdir ../runfreeze-example
+cd ../runfreeze-example
+npm init --yes
+npm install --ignore-scripts "../runfreeze/$package_file"
 ```
+
+After a version is visible from `npm view runfreeze version`, a global registry
+install is also available with `npm install --global runfreeze`.
 
 ## Use
 
-Use the installed CLI:
+Use the locally installed CLI from the clean working directory:
 
 ```sh
-runfreeze init
-runfreeze record --config runfreeze.yaml --output runfreeze.json
-runfreeze summarize runfreeze.json --output RUNS.md
-runfreeze verify runfreeze.json
+./node_modules/.bin/runfreeze init
+./node_modules/.bin/runfreeze record --config runfreeze.yaml --output runfreeze.json
+./node_modules/.bin/runfreeze summarize runfreeze.json --output RUNS.md
+./node_modules/.bin/runfreeze verify runfreeze.json
 ```
 
 Both `summarize` and `verify` validate external JSON against the complete schema-1
