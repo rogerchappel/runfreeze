@@ -13,9 +13,9 @@ format and uses semantic versioning when versioned releases are published.
 
 ## Release Links
 
-- Unreleased:
-  `https://github.com/rogerchappel/runfreeze/compare/...HEAD`
-- Latest release:
-  `https://github.com/rogerchappel/runfreeze/releases/latest`
+- No version has been published to npm and no release tag exists yet.
+- Unreleased work is available on the
+  [`main` branch](https://github.com/rogerchappel/runfreeze/tree/main).
 
-Replace placeholder links once the first release tag exists.
+Add version comparison and latest-release links when the first release tag is
+published.
