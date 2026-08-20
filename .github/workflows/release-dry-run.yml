@@ -8,6 +8,7 @@ on:
       - package.json
       - package-lock.json
       - scripts/package-smoke.sh
+      - scripts/release-workflow.test.mjs
       - .github/workflows/release*.yml
 
 permissions:

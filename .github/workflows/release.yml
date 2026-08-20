@@ -5,16 +5,14 @@ on:
     tags:
       - 'v*.*.*'
 
-permissions:
-  contents: write
-  id-token: write
-
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   RELEASEBOX_REF: v0.1.0
 
 jobs:
-  release:
+  verify:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -24,7 +22,6 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          registry-url: https://registry.npmjs.org
       - name: Install dependencies
         run: npm ci
       - name: Install ReleaseBox
@@ -38,15 +35,48 @@ jobs:
       - name: Run release checks
         run: npm run release:check
       - name: Pack verified package
-        id: package
-        run: |
-          package_file=$(npm pack --silent)
-          echo "file=$package_file" >> "$GITHUB_OUTPUT"
-      - name: Publish package to npm
-        run: npm publish "${{ steps.package.outputs.file }}" --provenance --access public
+        run: npm pack
       - name: Generate release notes
         run: node /tmp/releasebox/bin/releasebox.js notes . > RELEASE_NOTES.md
+      - name: Upload verified release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: verified-release
+          path: |
+            *.tgz
+            RELEASE_NOTES.md
+          if-no-files-found: error
+          retention-days: 3
+
+  npm-publish:
+    needs: verify
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - name: Download verified release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: verified-release
+      - name: Publish verified package
+        run: npm publish --provenance --access public *.tgz
+
+  github-release:
+    needs: verify
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download verified release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: verified-release
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${GITHUB_REF_NAME}" --notes-file RELEASE_NOTES.md "${{ steps.package.outputs.file }}"
+        run: gh release create "${GITHUB_REF_NAME}" --notes-file RELEASE_NOTES.md *.tgz
