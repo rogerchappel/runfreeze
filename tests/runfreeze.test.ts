@@ -41,6 +41,37 @@ commands:
     assert.equal(verifyReport(report).ok, true);
   });
 
+  it("renders collision-safe Markdown for captured text and metadata", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "runfreeze-markdown-"));
+    const configPath = path.join(root, "runfreeze.yaml");
+    await writeFile(
+      configPath,
+      `root: .
+allow: [node]
+commands:
+  - id: safe
+    run: node --version
+`,
+    );
+    const report = await record(await loadConfig(configPath), "test");
+    const command = report.commands[0]!;
+    report.root = "root `with` markers";
+    command.id = "# heading | table";
+    command.command = ["tool", "arg|value", "has```ticks"];
+    command.cwd = "cwd `quoted`";
+    command.stdout.text = "before\n```\nafter\n````";
+    command.stderr.text = "# not a heading\n| not | a table |";
+
+    const markdown = renderMarkdown(report);
+
+    assert.match(markdown, /Root: ``root `with` markers``/);
+    assert.match(markdown, /\| # heading &#124; table \| ````tool arg&#124;value has```ticks```` \|/);
+    assert.match(markdown, /^## `# heading \| table`$/m);
+    assert.match(markdown, /^- CWD: `` cwd `quoted` ``$/m);
+    assert.match(markdown, /`````text\nbefore\n```\nafter\n````\n`````/);
+    assert.match(markdown, /```text\n# not a heading\n\| not \| a table \|\n```/);
+  });
+
   it("records executable launch errors and continues with later commands", async () => {
     const root = await mkdtemp(path.join(tmpdir(), "runfreeze-spawn-error-"));
     const configPath = path.join(root, "runfreeze.yaml");
