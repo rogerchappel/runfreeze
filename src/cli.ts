@@ -62,7 +62,13 @@ program
     process.exitCode = 2;
   });
 
-await program.parseAsync();
+try {
+  await program.parseAsync();
+} catch (error) {
+  const message = error instanceof Error ? error.message : String(error);
+  process.stderr.write(`${message.replace(/\s*\n\s*/g, " ")}\n`);
+  process.exitCode = 1;
+}
 
 function starterConfig(): string {
   return `root: .
