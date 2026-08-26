@@ -11,6 +11,12 @@ format and uses semantic versioning when versioned releases are published.
 
 - Initial project setup.
 
+### Changed
+
+- CLI reports expected user errors as single-line stderr messages with exit
+  code 1 instead of raw stack traces (missing report, malformed report JSON,
+  invalid config, `init` on an existing file).
+
 ## Release Links
 
 - No version has been published to npm and no release tag exists yet.

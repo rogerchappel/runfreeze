@@ -46,6 +46,10 @@ Both `summarize` and `verify` validate external JSON against the complete schema
 report structure, including summary totals. `verify` additionally exits nonzero
 when a required command failed or any command timed out.
 
+Expected user errors (a missing report, malformed report JSON, an invalid config,
+or `init` on an existing file) print a single-line message to stderr and exit with
+code 1 instead of leaking a raw stack trace.
+
 Commands fail closed: each command must stay inside the configured root and match the `allow` list.
 When a command exceeds `timeoutMs`, runfreeze sends `SIGTERM`, waits a one-second grace period,
 then sends `SIGKILL` if the command is still running. The report marks the command as timed out.
