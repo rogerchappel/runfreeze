@@ -16,6 +16,7 @@ format and uses semantic versioning when versioned releases are published.
 - CLI reports expected user errors as single-line stderr messages with exit
   code 1 instead of raw stack traces (missing report, malformed report JSON,
   invalid config, `init` on an existing file).
+- Truncated stdout and stderr now stop at complete UTF-8 character boundaries.
 
 ## Release Links
 

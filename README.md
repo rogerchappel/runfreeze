@@ -55,6 +55,10 @@ When a command exceeds `timeoutMs`, runfreeze sends `SIGTERM`, waits a one-secon
 then sends `SIGKILL` if the command is still running. The report marks the command as timed out.
 If an executable cannot be started, runfreeze records a failed command with the launch diagnostic
 in stderr, continues recording later configured commands, and writes the complete evidence report.
+Captured stdout and stderr are each bounded by `maxOutputBytes`. When that limit
+cuts through a multibyte UTF-8 character, runfreeze drops the incomplete
+character so captured text remains valid UTF-8; the reported byte count reflects
+the bytes retained and `truncated` remains `true`.
 
 See [examples/runfreeze.yaml](examples/runfreeze.yaml) for a tiny allowlisted
 Node.js command set that can be recorded, summarized, and verified locally.
