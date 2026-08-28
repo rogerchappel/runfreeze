@@ -3,12 +3,34 @@ import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
+import { ByteCapture } from "../src/capture.js";
 import { loadConfig } from "../src/config.js";
 import { renderMarkdown } from "../src/markdown.js";
 import { record } from "../src/runner.js";
 import { verifyReport } from "../src/verify.js";
 
 describe("runfreeze", () => {
+  it("keeps truncated stdout and stderr on UTF-8 boundaries", () => {
+    const stdout = new ByteCapture(4);
+    const stderr = new ByteCapture(5);
+
+    stdout.append(Buffer.from("abc😀"));
+    stderr.append(Buffer.from("warn😀"));
+
+    assert.deepEqual(stdout.toJSON(), { text: "abc", bytes: 3, truncated: true });
+    assert.deepEqual(stderr.toJSON(), { text: "warn", bytes: 4, truncated: true });
+    assert.equal(stdout.toJSON().text.endsWith("�"), false);
+    assert.equal(stderr.toJSON().text.endsWith("�"), false);
+  });
+
+  it("does not resume capture after dropping a partial UTF-8 character", () => {
+    const capture = new ByteCapture(4);
+    capture.append(Buffer.from("abc😀"));
+    capture.append("x");
+
+    assert.deepEqual(capture.toJSON(), { text: "abc", bytes: 3, truncated: true });
+  });
+
   it("records stdout, stderr, failures, truncation, and redactions", async () => {
     const root = await mkdtemp(path.join(tmpdir(), "runfreeze-"));
     const configPath = path.join(root, "runfreeze.yaml");
