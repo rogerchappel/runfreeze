@@ -90,6 +90,9 @@ MIT
 
 ## Verification
 
+runfreeze supports Node.js 20 and newer. CI runs the complete repository checks
+on Node.js 20 (the minimum supported version) and Node.js 24.
+
 Run these checks before opening a PR or publishing a release:
 
 ```bash

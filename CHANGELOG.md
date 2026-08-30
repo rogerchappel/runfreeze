@@ -13,6 +13,8 @@ format and uses semantic versioning when versioned releases are published.
 
 ### Changed
 
+- Test discovery now works on every supported Node.js version, and CI verifies
+  the minimum Node.js 20 runtime alongside Node.js 24.
 - CLI reports expected user errors as single-line stderr messages with exit
   code 1 instead of raw stack traces (missing report, malformed report JSON,
   invalid config, `init` on an existing file).
