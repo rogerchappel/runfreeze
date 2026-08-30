@@ -27,7 +27,7 @@
   "scripts": {
     "build": "tsc",
     "check": "tsc --noEmit",
-    "test": "npm run build && node --test \"dist/tests/**/*.test.js\"",
+    "test": "npm run build && node --test dist/tests",
     "smoke": "bash scripts/smoke.sh",
     "prepack": "npm run build",
     "package:smoke": "bash scripts/package-smoke.sh",
