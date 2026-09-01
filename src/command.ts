@@ -72,11 +72,13 @@ function splitShellLike(input: string): string[] {
   let current = "";
   let quote: "'" | '"' | null = null;
   let escaping = false;
+  let tokenStarted = false;
 
   for (const char of input.trim()) {
     if (escaping) {
       current += char;
       escaping = false;
+      tokenStarted = true;
       continue;
     }
     if (char === "\\" && quote !== "'") {
@@ -85,6 +87,7 @@ function splitShellLike(input: string): string[] {
     }
     if ((char === "'" || char === '"') && quote === null) {
       quote = char;
+      tokenStarted = true;
       continue;
     }
     if (char === quote) {
@@ -92,22 +95,25 @@ function splitShellLike(input: string): string[] {
       continue;
     }
     if (/\s/.test(char) && quote === null) {
-      if (current !== "") {
+      if (tokenStarted) {
         result.push(current);
         current = "";
+        tokenStarted = false;
       }
       continue;
     }
     current += char;
+    tokenStarted = true;
   }
 
   if (escaping) {
     current += "\\";
+    tokenStarted = true;
   }
   if (quote !== null) {
     throw new RunfreezeError("Command string has an unterminated quote.", "COMMAND_INVALID");
   }
-  if (current !== "") {
+  if (tokenStarted) {
     result.push(current);
   }
   return result;
