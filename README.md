@@ -51,6 +51,15 @@ or `init` on an existing file) print a single-line message to stderr and exit wi
 code 1 instead of leaking a raw stack trace.
 
 Commands fail closed: each command must stay inside the configured root and match the `allow` list.
+String-form `run` values use shell-like tokenization for whitespace, quotes, and
+backslash escapes; quoted empty arguments such as `""` and `''` are preserved.
+Use YAML array form when exact argument boundaries are preferable, including an
+explicit empty argument:
+
+```yaml
+run: [node, script.mjs, "", tail]
+```
+
 When a command exceeds `timeoutMs`, runfreeze sends `SIGTERM`, waits a one-second grace period,
 then sends `SIGKILL` if the command is still running. The report marks the command as timed out.
 If an executable cannot be started, runfreeze records a failed command with the launch diagnostic
