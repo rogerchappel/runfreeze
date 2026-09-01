@@ -4,12 +4,57 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
 import { ByteCapture } from "../src/capture.js";
+import { normalizeRun } from "../src/command.js";
 import { loadConfig } from "../src/config.js";
 import { renderMarkdown } from "../src/markdown.js";
 import { record } from "../src/runner.js";
 import { verifyReport } from "../src/verify.js";
 
 describe("runfreeze", () => {
+  it("normalizes quoted empty arguments without changing shell-like parsing", () => {
+    assert.deepEqual(normalizeRun(`node script.mjs '' "" tail`), [
+      "node",
+      "script.mjs",
+      "",
+      "",
+      "tail",
+    ]);
+    assert.deepEqual(normalizeRun(`node pre''post "two words" escaped\\ space`), [
+      "node",
+      "prepost",
+      "two words",
+      "escaped space",
+    ]);
+    assert.deepEqual(normalizeRun(["node", "", "tail"]), ["node", "", "tail"]);
+    assert.throws(() => normalizeRun(`node "unterminated`), /unterminated quote/);
+  });
+
+  it("records an explicitly quoted empty argument in the report and child argv", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "runfreeze-empty-argument-"));
+    const configPath = path.join(root, "runfreeze.yaml");
+    await writeFile(
+      configPath,
+      `root: .
+allow: [node]
+commands:
+  - id: empty-argument
+    run: >-
+      node -e "console.log(JSON.stringify(process.argv.slice(1)))" "" tail
+`,
+    );
+
+    const report = await record(await loadConfig(configPath), "test");
+
+    assert.deepEqual(report.commands[0]?.command, [
+      "node",
+      "-e",
+      "console.log(JSON.stringify(process.argv.slice(1)))",
+      "",
+      "tail",
+    ]);
+    assert.equal(report.commands[0]?.stdout.text, `["","tail"]\n`);
+  });
+
   it("keeps truncated stdout and stderr on UTF-8 boundaries", () => {
     const stdout = new ByteCapture(4);
     const stderr = new ByteCapture(5);
