@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { mkdtemp, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
@@ -70,6 +70,30 @@ describe("runfreeze CLI error handling", () => {
     const result = await runCli(["init", "--output", existing]);
 
     assertSingleLineError(result, /EEXIST/);
+  });
+
+  it("creates parent directories for nested init output without overwriting", async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), "runfreeze-cli-init-nested-"));
+    const output = path.join(dir, "config", "nested", "runfreeze.yaml");
+
+    const created = await runCli(["init", "--output", output]);
+    assert.equal(created.code, 0);
+    assert.match(await readFile(output, "utf8"), /^root: \.$/m);
+
+    const existing = await runCli(["init", "--output", output]);
+    assertSingleLineError(existing, /EEXIST/);
+  });
+
+  it("creates parent directories for nested summarize output", async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), "runfreeze-cli-summary-nested-"));
+    const config = path.join(dir, "runfreeze.yaml");
+    const report = path.join(dir, "runfreeze.json");
+    const output = path.join(dir, "reports", "nested", "RUNS.md");
+
+    assert.equal((await runCli(["init", "--output", config])).code, 0);
+    assert.equal((await runCli(["record", "--config", config, "--output", report])).code, 0);
+    assert.equal((await runCli(["summarize", report, "--output", output])).code, 0);
+    assert.match(await readFile(output, "utf8"), /Runfreeze Evidence/);
   });
 
   it("keeps the success and verification flow intact", async () => {
