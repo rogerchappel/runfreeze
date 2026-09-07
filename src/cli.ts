@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { Command } from "commander";
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
 import { DEFAULT_CONFIG_PATH, DEFAULT_MARKDOWN_PATH, DEFAULT_OUTPUT_PATH } from "./defaults.js";
 import { loadConfig } from "./config.js";
 import { readReport, writeJson } from "./io.js";
@@ -20,6 +21,7 @@ program
   .description("Write a starter runfreeze.yaml")
   .option("-o, --output <path>", "config path", DEFAULT_CONFIG_PATH)
   .action(async (options: { output: string }) => {
+    await createParentDirectory(options.output);
     await writeFile(options.output, starterConfig(), { encoding: "utf8", flag: "wx" });
     process.stdout.write(`Created ${options.output}\n`);
   });
@@ -42,6 +44,7 @@ program
   .option("-o, --output <path>", "Markdown output path", DEFAULT_MARKDOWN_PATH)
   .action(async (reportPath: string, options: { output: string }) => {
     const report = await readReport(reportPath);
+    await createParentDirectory(options.output);
     await writeFile(options.output, renderMarkdown(report), "utf8");
   });
 
@@ -68,6 +71,10 @@ try {
   const message = error instanceof Error ? error.message : String(error);
   process.stderr.write(`${message.replace(/\s*\n\s*/g, " ")}\n`);
   process.exitCode = 1;
+}
+
+async function createParentDirectory(filePath: string): Promise<void> {
+  await mkdir(path.dirname(path.resolve(filePath)), { recursive: true });
 }
 
 function starterConfig(): string {
