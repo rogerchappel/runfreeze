@@ -42,6 +42,9 @@ Use the locally installed CLI from the clean working directory:
 ./node_modules/.bin/runfreeze verify runfreeze.json
 ```
 
+`init` and `summarize` create missing parent directories for their `--output`
+paths. `init` still refuses to overwrite an existing configuration file.
+
 Both `summarize` and `verify` validate external JSON against the complete schema-1
 report structure, including summary totals. `verify` additionally exits nonzero
 when a required command failed or any command timed out.
