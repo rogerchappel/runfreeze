@@ -102,16 +102,13 @@ MIT
 
 ## Verification
 
-runfreeze supports Node.js 20 and newer. CI runs the complete repository checks
-on Node.js 20 (the minimum supported version) and Node.js 24.
+runfreeze supports Node.js 20 and newer. CI runs the canonical
+`npm run release:check` contract on Node.js 20 (the minimum supported version)
+and Node.js 24.
 
 Run these checks before opening a PR or publishing a release:
 
 ```bash
-npm run check
-npm test
-npm run smoke
-npm run package:smoke
 npm run release:check
 ```
 
