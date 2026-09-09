@@ -29,5 +29,13 @@ assert.ok(
   ),
   'CI must install each declared Node version',
 );
+assert.ok(
+  job.steps.some(
+    (step) =>
+      typeof step.run === 'string' &&
+      /^\s*npm run release:check\s*$/mu.test(step.run),
+  ),
+  'CI must run the canonical release:check contract on every Node matrix job',
+);
 
 console.log('CI workflow contract passed');
