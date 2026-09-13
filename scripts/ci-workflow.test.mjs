@@ -12,7 +12,7 @@ const job = workflow.jobs['repository-hygiene'];
 
 assert.equal(
   packageJson.scripts.test,
-  'npm run build && node --test dist/tests/cli.test.js dist/tests/runfreeze.test.js dist/tests/verify.test.js',
+  'npm run build && node --test dist/tests/cli.test.js dist/tests/runfreeze.test.js dist/tests/verify.test.js dist/tests/capture.test.js dist/tests/redact.test.js dist/tests/config.test.js',
   'test discovery must work on the minimum supported Node version',
 );
 assert.deepEqual(
@@ -23,7 +23,7 @@ assert.deepEqual(
 assert.ok(
   job.steps.some(
     (step) =>
-      step.uses === 'actions/setup-node@v6' &&
+      step.uses === 'actions/setup-node@v5' &&
       step.with?.['node-version'] === '${{ matrix.node }}' &&
       step.with?.cache === 'npm',
   ),
