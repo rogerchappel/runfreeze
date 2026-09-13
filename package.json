@@ -27,7 +27,7 @@
   "scripts": {
     "build": "tsc",
     "check": "tsc --noEmit",
-    "test": "npm run build && node --test dist/tests/cli.test.js dist/tests/runfreeze.test.js dist/tests/verify.test.js",
+    "test": "npm run build && node --test dist/tests/cli.test.js dist/tests/runfreeze.test.js dist/tests/verify.test.js dist/tests/capture.test.js dist/tests/redact.test.js dist/tests/config.test.js",
     "smoke": "bash scripts/smoke.sh",
     "prepack": "npm run build",
     "package:smoke": "bash scripts/package-smoke.sh",
