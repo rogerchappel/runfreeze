@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/rogerchappel/runfreeze/blob/main/schemas/runfreeze-config.schema.json",
+  "title": "runfreeze configuration",
+  "description": "JSON Schema for runfreeze.yaml configuration (YAML is converted to JSON data before validation).",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "root": { "type": "string", "minLength": 1, "default": "." },
+    "commands": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/command" } },
+    "allow": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "redact": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "maxOutputBytes": { "$ref": "#/$defs/positiveInteger" },
+    "timeoutMs": { "$ref": "#/$defs/positiveInteger" }
+  },
+  "required": ["commands"],
+  "$defs": {
+    "positiveInteger": { "type": "integer", "minimum": 1 },
+    "command": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "run": { "oneOf": [ { "type": "string", "minLength": 1 }, { "type": "array", "minItems": 1, "items": { "type": "string" } } ] },
+        "cwd": { "type": "string", "minLength": 1 },
+        "env": { "type": "object", "additionalProperties": { "type": "string" } },
+        "timeoutMs": { "$ref": "#/$defs/positiveInteger" },
+        "maxOutputBytes": { "$ref": "#/$defs/positiveInteger" },
+        "allowFailure": { "type": "boolean", "default": false }
+      },
+      "required": ["run"]
+    }
+  }
+}

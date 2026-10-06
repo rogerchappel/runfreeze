@@ -15,7 +15,7 @@ Status: active
 
 ## Next
 
-- [ ] Add JSON schema documentation for `runfreeze.yaml` and evidence output.
+- [x] Add JSON schema documentation for `runfreeze.yaml` and evidence output.
 - [ ] Add richer diffing between two evidence packs.
 - [ ] Add optional SARIF output for CI annotations.
 - [ ] Add examples for multi-command release smoke evidence.
