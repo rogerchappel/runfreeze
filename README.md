@@ -73,7 +73,9 @@ character so captured text remains valid UTF-8; the reported byte count reflects
 the bytes retained and `truncated` remains `true`.
 
 See [examples/runfreeze.yaml](examples/runfreeze.yaml) for a tiny allowlisted
-Node.js command set that can be recorded, summarized, and verified locally.
+Node.js command set that can be recorded, summarized, and verified locally. The
+versioned [configuration and evidence JSON Schemas](docs/schemas.md) document
+the accepted configuration and schema-1 report shapes.
 
 ## Verify
 
