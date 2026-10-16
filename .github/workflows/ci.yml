@@ -36,6 +36,7 @@ jobs:
           required_files=(
             README.md
             LICENSE
+            package-lock.json
           )
 
           for file in "${required_files[@]}"; do
@@ -67,10 +68,6 @@ jobs:
             exit 0
           fi
 
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+          npm ci
 
           npm run release:check
