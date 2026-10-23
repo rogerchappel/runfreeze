@@ -139,6 +139,21 @@ commands:
     assert.match(markdown, /```text\n# not a heading\n\| not \| a table \|\n```/);
   });
 
+  it("keeps HTML-like captured output inert inside fenced text", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "runfreeze-markdown-html-"));
+    const configPath = path.join(root, "runfreeze.yaml");
+    await writeFile(
+      configPath,
+      `root: .\nallow: [node]\ncommands:\n  - id: html\n    run: node --version\n`,
+    );
+    const report = await record(await loadConfig(configPath), "test");
+    report.commands[0]!.stdout.text = "<script>alert(1)</script>\n<div>captured</div>";
+
+    const markdown = renderMarkdown(report);
+
+    assert.match(markdown, /```text\n<script>alert\(1\)<\/script>\n<div>captured<\/div>\n```/);
+  });
+
   it("records executable launch errors and continues with later commands", async () => {
     const root = await mkdtemp(path.join(tmpdir(), "runfreeze-spawn-error-"));
     const configPath = path.join(root, "runfreeze.yaml");
