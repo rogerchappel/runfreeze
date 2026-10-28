@@ -7,7 +7,7 @@ import { loadConfig } from "./config.js";
 import { readReport, writeJson } from "./io.js";
 import { renderMarkdown } from "./markdown.js";
 import { record } from "./runner.js";
-import { verifyReport } from "./verify.js";
+import { diffReports, verifyReport } from "./verify.js";
 
 const version = "0.1.0";
 
@@ -46,6 +46,18 @@ program
     const report = await readReport(reportPath);
     await createParentDirectory(options.output);
     await writeFile(options.output, renderMarkdown(report), "utf8");
+  });
+
+program
+  .command("diff")
+  .description("Compare commands in two runfreeze evidence packs")
+  .argument("<before>", "baseline report JSON")
+  .argument("<after>", "new report JSON")
+  .action(async (beforePath: string, afterPath: string) => {
+    const before = JSON.parse(await readFile(beforePath, "utf8"));
+    const after = JSON.parse(await readFile(afterPath, "utf8"));
+    const diff = diffReports(before, after);
+    process.stdout.write(`${JSON.stringify(diff, null, 2)}\n`);
   });
 
 program
