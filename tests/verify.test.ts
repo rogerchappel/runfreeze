@@ -5,7 +5,7 @@ import path from "node:path";
 import { describe, it } from "node:test";
 import { readReport } from "../src/io.js";
 import type { RunfreezeReport } from "../src/types.js";
-import { validateReport, verifyReport } from "../src/verify.js";
+import { diffReports, validateReport, verifyReport } from "../src/verify.js";
 
 describe("report validation", () => {
   it("accepts a complete, consistent schema-1 report", () => {
@@ -109,3 +109,20 @@ function validReport(): RunfreezeReport {
     summary: { total: 1, passed: 1, failed: 0, redactions: 0, truncated: 0 },
   };
 }
+
+describe("evidence pack diff", () => {
+  it("sorts added, removed, and changed command ids deterministically", () => {
+    const before = validReport();
+    before.commands.push({ ...before.commands[0]!, id: "remove" });
+    before.summary.total = 2; before.summary.passed = 2;
+    const after = validReport();
+    after.commands[0]!.command = ["node", "--version", "--json"];
+    after.commands.push({ ...after.commands[0]!, id: "z-add" }, { ...after.commands[0]!, id: "a-add" });
+    after.summary.total = 3; after.summary.passed = 3;
+    assert.deepEqual(diffReports(before, after), { added: ["a-add", "z-add"], removed: ["remove"], changed: ["test"] });
+  });
+
+  it("rejects invalid reports", () => {
+    assert.throws(() => diffReports({}, validReport()), /Invalid before report/);
+  });
+});

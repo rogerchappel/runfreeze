@@ -185,3 +185,29 @@ function nonNegativeInteger(value: unknown, path: string, errors: string[]): voi
 function isNonNegativeInteger(value: unknown): value is number {
   return Number.isInteger(value) && (value as number) >= 0;
 }
+
+export type EvidencePackDiff = {
+  added: string[];
+  removed: string[];
+  changed: string[];
+};
+
+/** Compare commands by id; command invocation or recorded outcome changes are reported. */
+export function diffReports(before: unknown, after: unknown): EvidencePackDiff {
+  const beforeResult = validateReport(before);
+  if (!beforeResult.ok) throw new Error(`Invalid before report: ${beforeResult.errors.join("; ")}`);
+  const afterResult = validateReport(after);
+  if (!afterResult.ok) throw new Error(`Invalid after report: ${afterResult.errors.join("; ")}`);
+  const left = before as RunfreezeReport;
+  const right = after as RunfreezeReport;
+  const leftById = new Map(left.commands.map((command) => [command.id, command]));
+  const rightById = new Map(right.commands.map((command) => [command.id, command]));
+  const added = [...rightById.keys()].filter((id) => !leftById.has(id)).sort();
+  const removed = [...leftById.keys()].filter((id) => !rightById.has(id)).sort();
+  const changed = [...leftById.keys()].filter((id) => {
+    const oldCommand = leftById.get(id);
+    const newCommand = rightById.get(id);
+    return newCommand !== undefined && JSON.stringify(oldCommand) !== JSON.stringify(newCommand);
+  }).sort();
+  return { added, removed, changed };
+}
