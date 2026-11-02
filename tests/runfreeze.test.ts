@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
@@ -9,8 +9,25 @@ import { loadConfig } from "../src/config.js";
 import { renderMarkdown } from "../src/markdown.js";
 import { record } from "../src/runner.js";
 import { verifyReport } from "../src/verify.js";
+import { writeJson } from "../src/io.js";
 
 describe("runfreeze", () => {
+  it("refuses to overwrite existing JSON and Markdown output", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "runfreeze-output-"));
+    const jsonPath = path.join(root, "report.json");
+    const markdownPath = path.join(root, "report.md");
+    await writeFile(jsonPath, "keep json\n");
+    await writeFile(markdownPath, "keep markdown\n");
+
+    await assert.rejects(writeJson(jsonPath, { replacement: true }), { code: "EEXIST" });
+    await assert.rejects(
+      writeFile(markdownPath, "replacement", { encoding: "utf8", flag: "wx" }),
+      { code: "EEXIST" },
+    );
+    assert.equal(await readFile(jsonPath, "utf8"), "keep json\n");
+    assert.equal(await readFile(markdownPath, "utf8"), "keep markdown\n");
+  });
+
   it("normalizes quoted empty arguments without changing shell-like parsing", () => {
     assert.deepEqual(normalizeRun(`node script.mjs '' "" tail`), [
       "node",

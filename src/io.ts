@@ -5,7 +5,7 @@ import { validateReport } from "./verify.js";
 
 export async function writeJson(filePath: string, data: unknown): Promise<void> {
   await mkdir(path.dirname(path.resolve(filePath)), { recursive: true });
-  await writeFile(filePath, `${JSON.stringify(data, null, 2)}\n`, "utf8");
+  await writeFile(filePath, `${JSON.stringify(data, null, 2)}\n`, { encoding: "utf8", flag: "wx" });
 }
 
 export async function readReport(filePath: string): Promise<RunfreezeReport> {

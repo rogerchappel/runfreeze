@@ -45,7 +45,7 @@ program
   .action(async (reportPath: string, options: { output: string }) => {
     const report = await readReport(reportPath);
     await createParentDirectory(options.output);
-    await writeFile(options.output, renderMarkdown(report), "utf8");
+    await writeFile(options.output, renderMarkdown(report), { encoding: "utf8", flag: "wx" });
   });
 
 program
