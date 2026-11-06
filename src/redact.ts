@@ -26,8 +26,13 @@ export function redactStreams(
     return output;
   };
 
-  const redactedStdout = { ...stdout, text: redactText(stdout.text) };
-  const redactedStderr = { ...stderr, text: redactText(stderr.text) };
+  const redactCapture = (capture: StreamCapture): StreamCapture => {
+    const text = redactText(capture.text);
+    return { ...capture, text, bytes: Buffer.byteLength(text, "utf8") };
+  };
+
+  const redactedStdout = redactCapture(stdout);
+  const redactedStderr = redactCapture(stderr);
   const total = Object.values(byPattern).reduce((sum, count) => sum + count, 0);
 
   return {
