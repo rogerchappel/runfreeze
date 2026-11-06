@@ -58,14 +58,15 @@ describe("redactStreams", () => {
     assert.equal(result.summary.total, 0);
   });
 
-  it("preserves bytes and truncated fields in returned captures", () => {
-    const before = capture("hello world"); // 11 bytes
-    const result = redactStreams(before, before, []);
+  it("reports bytes for returned redacted text and preserves truncation", () => {
+    const before = capture("token=é");
+    before.truncated = true;
+    const result = redactStreams(before, capture(""), ["é"]);
 
-    assert.equal(result.stdout.bytes, 11);
-    assert.equal(result.stdout.truncated, false);
-    assert.equal(result.stderr.bytes, 11);
-    assert.equal(result.stderr.truncated, false);
+    assert.equal(result.stdout.text, "token=[REDACTED]");
+    assert.equal(result.stdout.bytes, Buffer.byteLength(result.stdout.text));
+    assert.equal(result.stdout.bytes, 16);
+    assert.equal(result.stdout.truncated, true);
   });
 });
 
