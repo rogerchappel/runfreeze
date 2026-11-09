@@ -12,6 +12,19 @@ describe("report validation", () => {
     assert.deepEqual(verifyReport(validReport()), { ok: true, errors: [] });
   });
 
+  it("rejects normalized invalid calendar dates and accepts ISO timestamps", () => {
+    const report = validReport();
+    report.createdAt = "2025-02-30T00:00:00Z";
+    report.commands[0]!.startedAt = "2025-02-30T00:00:00Z";
+    assert.deepEqual(validateReport(report).errors, [
+      "createdAt must be a valid date string",
+      "commands[0].startedAt must be a valid date string",
+    ]);
+    const valid = validReport();
+    valid.createdAt = "2025-02-28T12:30:00+00:00";
+    assert.equal(validateReport(valid).ok, true);
+  });
+
   it("reports missing top-level metadata without throwing", () => {
     const result = verifyReport({ schemaVersion: 1, commands: [] });
 
