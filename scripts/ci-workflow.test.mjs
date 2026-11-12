@@ -23,7 +23,7 @@ assert.deepEqual(
 assert.ok(
   job.steps.some(
     (step) =>
-      step.uses === 'actions/setup-node@v5' &&
+      step.uses === 'actions/setup-node@v6' &&
       step.with?.['node-version'] === '${{ matrix.node }}' &&
       step.with?.cache === 'npm',
   ),
