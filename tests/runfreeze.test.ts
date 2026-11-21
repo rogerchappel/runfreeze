@@ -10,8 +10,31 @@ import { renderMarkdown } from "../src/markdown.js";
 import { record } from "../src/runner.js";
 import { verifyReport } from "../src/verify.js";
 import { writeJson } from "../src/io.js";
+import { redactStreams } from "../src/redact.js";
 
 describe("runfreeze", () => {
+  it("rejects unsafe redaction patterns promptly while preserving valid and case-insensitive patterns", () => {
+    const started = Date.now();
+    assert.throws(
+      () => redactStreams(
+        { text: `${"a".repeat(30_000)}!`, bytes: 30_001, truncated: false },
+        { text: "TOKEN=secret", bytes: 12, truncated: false },
+        ["^(a+)+$"],
+      ),
+      /nested repetition is unsupported/,
+    );
+    assert.ok(Date.now() - started < 100, "unsafe pattern should be rejected before matching output");
+
+    const result = redactStreams(
+      { text: "token=secret", bytes: 12, truncated: false },
+      { text: "Password=hidden", bytes: 15, truncated: false },
+      ["token=\\w+", "(?i)password=\\w+"],
+    );
+    assert.equal(result.stdout.text, "[REDACTED]");
+    assert.equal(result.stderr.text, "[REDACTED]");
+    assert.equal(result.summary.total, 2);
+  });
+
   it("refuses to overwrite existing JSON and Markdown output", async () => {
     const root = await mkdtemp(path.join(tmpdir(), "runfreeze-output-"));
     const jsonPath = path.join(root, "report.json");
