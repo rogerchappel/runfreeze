@@ -7,6 +7,13 @@ export type RedactionResult = {
   summary: RedactionSummary;
 };
 
+const MAX_PATTERN_LENGTH = 256;
+
+function hasUnsafeRepetition(pattern: string): boolean {
+  // Nested repetition and quantified alternation can cause exponential backtracking.
+  return /\([^)]*(?:[*+{]|\|)[^)]*\)[*+{]/u.test(pattern);
+}
+
 export function redactStreams(
   stdout: StreamCapture,
   stderr: StreamCapture,
@@ -44,6 +51,10 @@ export function redactStreams(
 
 function compilePattern(pattern: string): { label: string; regex: RegExp } {
   try {
+    const source = pattern.startsWith("(?i)") ? pattern.slice(4) : pattern;
+    if (source.length > MAX_PATTERN_LENGTH || hasUnsafeRepetition(source)) {
+      throw new Error(`pattern exceeds safe limits (maximum ${MAX_PATTERN_LENGTH} characters; nested repetition is unsupported)`);
+    }
     if (pattern.startsWith("(?i)")) {
       return {
         label: pattern,
