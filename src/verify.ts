@@ -18,7 +18,17 @@ export function validateReport(report: unknown): VerifyResult {
   if (!Array.isArray(commands)) {
     errors.push("commands must be an array");
   } else {
-    commands.forEach((command, index) => validateCommand(command, `commands[${index}]`, errors));
+    const firstIndexById = new Map<string, number>();
+    commands.forEach((command, index) => {
+      validateCommand(command, `commands[${index}]`, errors);
+      if (!isRecord(command) || typeof command.id !== "string" || command.id.length === 0) return;
+      const firstIndex = firstIndexById.get(command.id);
+      if (firstIndex !== undefined) {
+        errors.push(`commands[${index}].id duplicates commands[${firstIndex}].id (${JSON.stringify(command.id)})`);
+      } else {
+        firstIndexById.set(command.id, index);
+      }
+    });
   }
 
   validateSummary(report.summary, Array.isArray(commands) ? commands : undefined, errors);

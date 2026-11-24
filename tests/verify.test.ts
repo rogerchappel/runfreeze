@@ -48,6 +48,21 @@ describe("report validation", () => {
     assert.ok(result.errors.includes("commands[0].stdout must be an object"));
   });
 
+  it("rejects duplicate command ids with deterministic paths", () => {
+    const report = validReport();
+    report.commands.push({ ...report.commands[0]!, id: "test" });
+    report.commands.push({ ...report.commands[0]!, id: "test" });
+    report.summary.total = 3;
+    report.summary.passed = 3;
+
+    assert.deepEqual(validateReport(report).errors, [
+      'commands[1].id duplicates commands[0].id ("test")',
+      'commands[2].id duplicates commands[0].id ("test")',
+    ]);
+    assert.throws(() => diffReports(report, validReport()), /Invalid before report: commands\[1\]\.id duplicates/);
+    assert.throws(() => diffReports(validReport(), report), /Invalid after report: commands\[1\]\.id duplicates/);
+  });
+
   it("rejects summaries inconsistent with command results", () => {
     const report = validReport();
     report.summary.passed = 0;
