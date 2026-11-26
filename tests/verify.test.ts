@@ -80,6 +80,31 @@ describe("report validation", () => {
     ]);
   });
 
+  it("requires exactly one termination result and accepts exit-code or signal-only reports", () => {
+    const missing = validReport();
+    missing.commands[0]!.exitCode = null;
+    missing.commands[0]!.signal = null;
+    missing.summary.passed = 0;
+    missing.summary.failed = 1;
+    assert.deepEqual(validateReport(missing).errors, [
+      "commands[0] must have exactly one of exitCode or signal",
+    ]);
+
+    const both = validReport();
+    both.commands[0]!.signal = "SIGTERM";
+    assert.deepEqual(validateReport(both).errors, [
+      "commands[0] must have exactly one of exitCode or signal",
+    ]);
+
+    assert.equal(validateReport(validReport()).ok, true);
+    const signalOnly = validReport();
+    signalOnly.commands[0]!.exitCode = null;
+    signalOnly.commands[0]!.signal = "SIGTERM";
+    signalOnly.summary.passed = 0;
+    signalOnly.summary.failed = 1;
+    assert.equal(validateReport(signalOnly).ok, true);
+  });
+
   it("distinguishes structurally valid failed and timed-out reports", () => {
     const failed = validReport();
     failed.commands[0]!.exitCode = 7;

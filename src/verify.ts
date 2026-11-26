@@ -76,6 +76,9 @@ function validateCommand(value: unknown, path: string, errors: string[]): void {
   nonNegativeInteger(value.durationMs, `${path}.durationMs`, errors);
   nullableInteger(value.exitCode, `${path}.exitCode`, errors);
   nullableString(value.signal, `${path}.signal`, errors);
+  if ((value.exitCode === null) === (value.signal === null)) {
+    errors.push(`${path} must have exactly one of exitCode or signal`);
+  }
   boolean(value.timedOut, `${path}.timedOut`, errors);
   validateStream(value.stdout, `${path}.stdout`, errors);
   validateStream(value.stderr, `${path}.stderr`, errors);
