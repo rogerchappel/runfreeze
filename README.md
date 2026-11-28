@@ -40,10 +40,17 @@ Use the locally installed CLI from the clean working directory:
 ./node_modules/.bin/runfreeze record --config runfreeze.yaml --output runfreeze.json
 ./node_modules/.bin/runfreeze summarize runfreeze.json --output RUNS.md
 ./node_modules/.bin/runfreeze verify runfreeze.json
+./node_modules/.bin/runfreeze diff baseline.json runfreeze.json
 ```
 
 `init` and `summarize` create missing parent directories for their `--output`
 paths. `init` still refuses to overwrite an existing configuration file.
+
+`diff <before> <after>` validates both schema-1 evidence packs and prints JSON
+with sorted command IDs in `added`, `removed`, and `changed` arrays. Commands
+are matched by ID; any difference in a matched command's recorded fields is
+reported as changed. Identical packs produce three empty arrays. Invalid packs
+are rejected with an actionable error and exit code 1.
 
 Both `summarize` and `verify` validate external JSON against the complete schema-1
 report structure, including summary totals. `verify` additionally exits nonzero

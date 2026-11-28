@@ -16,7 +16,7 @@ Status: active
 ## Next
 
 - [x] Add JSON schema documentation for `runfreeze.yaml` and evidence output.
-- [ ] Add richer diffing between two evidence packs.
+- [x] Add deterministic diffing between two evidence packs.
 - [ ] Add optional SARIF output for CI annotations.
 - [ ] Add examples for multi-command release smoke evidence.
 - [ ] Add package-install smoke coverage before first npm publish.
